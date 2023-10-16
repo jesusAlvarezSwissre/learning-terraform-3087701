@@ -14,7 +14,7 @@ data "aws_ami" "app_ami" {
   owners = ["979382823631"] # Bitnami
 }
 
-module "vpc" {
+module "blog_vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
   name = "dev"
@@ -37,14 +37,14 @@ module "blog_autoscaling" {
 
   min_size            = 1
   max_size            = 2
-  vpc_zone_identifier = module.vpc.public_subnets
-  target_group_arns   = module.alb.target_group_arns
+  vpc_zone_identifier = module.blog_vpc.public_subnets
+  target_group_arns   = module.blog_alb.target_group_arns
   security_groups     = [module.blog_sg.security_group_id]
   instance_type       = var.instance_type
   image_id            = data.aws_ami.app_ami.id
 }
 
-module "alb" {
+module "blog_alb" {
   source  = "terraform-aws-modules/alb/aws"
   version = "~> 6.0"
 
@@ -52,8 +52,8 @@ module "alb" {
 
   load_balancer_type = "application"
 
-  vpc_id             = module.vpc.vpc_id
-  subnets            = module.vpc.public_subnets
+  vpc_id             = module.blog_vpc.vpc_id
+  subnets            = module.blog_vpc.public_subnets
   security_groups    = [module.blog_sg.security_group_id]
 
   target_groups = [
@@ -88,7 +88,7 @@ module "blog_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "4.13.0"
 
-  vpc_id  = module.vpc.vpc_id
+  vpc_id  = module.blog_vpc.vpc_id
   name    = "blog"
   ingress_rules = ["https-443-tcp","http-80-tcp"]
   ingress_cidr_blocks = ["0.0.0.0/0"]
