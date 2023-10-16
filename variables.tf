@@ -32,13 +32,13 @@ variable "environment" {
   
 }
 
-var asg_min {
+variable "asg_min" {
   description = "minimum instances in cluster"
 
   default = 1
 }
 
-var asg_max {
+variable "asg_max" {
   description = "maximum instances in cluster"
 
   default = 2
